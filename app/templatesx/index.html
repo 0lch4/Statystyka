@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strona główna</title>
+</head>
+<body>
+    <form id='main_form' action="/submit" method="post">
+        <label for="select_method">Wybierz co chcesz policzyć</label>
+        <select name="option" id="select_method">
+            <option value="" hidden disabled selected>Wybierz</option>
+            <option value="rozklad_normalny">Rozkład normalny</option>
+            <option value="rozklad_nie_normalny">Rozkład_nie_normalny</option>
+        </select>
+        <input type="submit" value="Wyślij">
+    </form>
+</body>
+</html>

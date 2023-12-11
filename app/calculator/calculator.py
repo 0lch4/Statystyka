@@ -2,16 +2,10 @@ from scipy.stats import norm
 import numpy as np
 import matplotlib.pyplot as plt
 
-def rozklad_normalny():
-    x = float(input("podaj wartosc: "))
-    mean = int(input("mean: "))
-    sd = int(input("sd: "))
 
-    cdf_value = norm.cdf(x, loc=mean, scale=sd)
-
-    print(
-        f"Wartość dystrybuanty normalnej dla x= {x}, średniej= {mean}, odchylenia standardowego= {sd}: {cdf_value}"
-    )
+def rozklad_normalny(value, mean, sd):
+    cdf_value = norm.cdf(value, loc=mean, scale=sd)
+    return cdf_value
 
 
 def prawdopodobienstwo_przedzialu():
@@ -44,32 +38,39 @@ def kwantyl_rozkladu_normalnego():
     quantile = norm.ppf(probability, loc=mean, scale=sd)
     print(f"Kwantyl: {quantile}")
 
+
 def uczciwy_rzut_kostka():
     rng = int(input("Podaj ilość uczciwych rzutów które chcesz wykonać: "))
-    results_fair = np.random.choice(['orzeł', 'reszka'], size=rng)
+    results_fair = np.random.choice(["orzeł", "reszka"], size=rng)
     print(results_fair)
+
 
 def nieuczciwy_rzut_kostka():
     rng = int(input("Podaj ilość uczciwych rzutów które chcesz wykonać: "))
-    ftrow1 = float(input("Podaj prawdopodobienstwo dla orla (suma z reszka musi wynosic 1): "))
-    ftrow2 = float(input("Podaj prawdopodobienstwo dla reszki (suma z orlem musi wynosic 1): "))
-    results = np.random.choice(['orzeł', 'reszka'], size=rng, p=[ftrow1, ftrow2])
+    ftrow1 = float(
+        input("Podaj prawdopodobienstwo dla orla (suma z reszka musi wynosic 1): ")
+    )
+    ftrow2 = float(
+        input("Podaj prawdopodobienstwo dla reszki (suma z orlem musi wynosic 1): ")
+    )
+    results = np.random.choice(["orzeł", "reszka"], size=rng, p=[ftrow1, ftrow2])
     print(results)
 
+
 def analiza_danych_z_rozkladu():
-    data=[]
-    mean=[]
-    sd=[]
+    data = []
+    mean = []
+    sd = []
     rng = int(input("podaj ile zestawow danych chcesz przeanalizowac: "))
     lenn = int(input("podaj ile wartosci ma byc w zestawie: "))
-    basic_rng=rng
-    while rng>0:
+    basic_rng = rng
+    while rng > 0:
         mean.append(int(input(f"podaj srednia dla zestawu {basic_rng-rng+1}: ")))
         sd.append(int(input(f"podaj odchylenie dla zestawu {basic_rng-rng+1}: ")))
-        rng-=1
-    for s,m in zip(sd,mean):
-        data.append(np.random.normal(m,s,lenn))
-    for e,dat in enumerate(data):
+        rng -= 1
+    for s, m in zip(sd, mean):
+        data.append(np.random.normal(m, s, lenn))
+    for e, dat in enumerate(data):
         plt.figure(figsize=(8, 6))
         plt.boxplot([dat], labels=[f"Dane {e+1}"])
         plt.title("Boxplot danych")

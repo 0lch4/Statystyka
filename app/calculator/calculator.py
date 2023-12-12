@@ -3,19 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def rozklad_normalny(value, mean, sd):
-    cdf_value = norm.cdf(value, loc=mean, scale=sd)
-    return cdf_value
+def rozklad_normalny(value: float, mean: float, sd: float):
+    return norm.cdf(value, loc=mean, scale=sd)
 
 
-def prawdopodobienstwo_przedzialu():
-    mean = int(input("podaj srednia μ: "))
-    sd = int(input("podaj odchylenie σ: "))
-    first = int(input("podaj poczatek przedzialu: "))
-    second = int(input("podaj koniec przedzialu: "))
-
-    result = norm.cdf(second, loc=mean, scale=sd) - norm.cdf(first, loc=mean, scale=sd)
-    print(result)
+def prawdopodobienstwo_przedzialu(mean: float, sd: float, first: float, second: float):
+    return norm.cdf(second, loc=mean, scale=sd) - norm.cdf(first, loc=mean, scale=sd)
 
 
 def prawdopodobienstwo_ze_wieksze():

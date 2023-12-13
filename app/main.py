@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Any
-from app.calculator.calculator import rozklad_normalny, prawdopodobienstwo_przedzialu
+from app.calculator.calculator import rozklad_normalny, prawdopodobienstwo_przedzialu, prawdopodobienstwo_ze_wieksze
 
 app = FastAPI()
 
@@ -25,6 +25,12 @@ class PrawdopodobienstwoPrzedzialu(BaseModel):
     first: str
     second: str
 
+class PrawdopodobienstwoZeWieksze(BaseModel):
+    number:str
+    mean:str
+    sd:str
+
+
 
 @app.get("/", response_class=HTMLResponse)
 async def main_site(request: Request) -> Any:
@@ -38,13 +44,14 @@ async def submit_form(option: str = Form(...)) -> Any:
         return RedirectResponse("/rozklad_normalny", status_code=303)
     if option == "prawdopodobienstwo_przedzialu":
         return RedirectResponse("/prawdopodobienstwo_przedzialu", status_code=303)
+    if option == "prawdopodobienstwo_ze_wieksze":
+        return RedirectResponse("/prawdopodobienstwo_ze_wieksze", status_code=303)
     return None
 
 
 @app.get("/rozklad_normalny", response_class=HTMLResponse)
 async def rozklad_normalny_template(request: Request) -> Any:
     return templates.TemplateResponse("rozklad_normalny.html", {"request": request})
-
 
 @app.post("/rozklad_normalny", response_class=HTMLResponse)
 async def rozklad_normalny_form(
@@ -66,15 +73,12 @@ async def rozklad_normalny_form(
     print("finall_data in rozklad_normalny_form:", finall_data)
     return templates.TemplateResponse("results.html", context_data)
 
-
 @app.get("/prawdopodobienstwo_przedzialu", response_class=HTMLResponse)
-async def prawdopodobienstwo_przedzialu_form(request: Request) -> Any:
+async def prawdopodobienstwo_przedzialu_template(request: Request) -> Any:
     return templates.TemplateResponse(
         "prawdopodobienstwo_przedzialu.html", {"request": request}
     )
 
-
-# do dokonczenia
 @app.post("/prawdopodobienstwo_przedzialu", response_class=HTMLResponse)
 async def prawdopodobienstwo_przedzialu_form(
     request: Request,
@@ -82,7 +86,7 @@ async def prawdopodobienstwo_przedzialu_form(
     sd: str = Form(...),
     first: str = Form(...),
     second: str = Form(...),
-):
+) -> Any:
     form_data = PrawdopodobienstwoPrzedzialu(mean=mean, sd=sd, first=first, second=second)
     finall_data = prawdopodobienstwo_przedzialu(
         float(form_data.mean),
@@ -91,6 +95,34 @@ async def prawdopodobienstwo_przedzialu_form(
         float(form_data.second),
     )
     rozklad_ = f"Wynik dla prawdopodobieństwa przedziału o danych {form_data} to :"
+    context_data = {
+        "request": request,
+        "finall_data": finall_data,
+        "rozklad_": rozklad_,
+    }
+    print("finall_data in rozklad_normalny_form:", finall_data)
+    return templates.TemplateResponse("results.html", context_data)
+
+@app.get("/prawdopodobienstwo_ze_wieksze", response_class=HTMLResponse)
+async def prawdopodobienstwo_ze_wieksze_template(request: Request) -> Any:
+    return templates.TemplateResponse(
+        "prawdopodobienstwo_ze_wieksze.html", {"request": request}
+    )
+
+@app.post("/prawdopodobienstwo_ze_wieksze", response_class=HTMLResponse)
+async def prawdopodobienstwo_ze_wieksze_form(
+    request: Request,
+    number: str = Form(...),
+    mean: str = Form(...),
+    sd: str = Form(...),
+) -> Any:
+    form_data = PrawdopodobienstwoZeWieksze(number=number, mean=mean, sd=sd)
+    finall_data = prawdopodobienstwo_ze_wieksze(
+        float(form_data.number),
+        float(form_data.mean),
+        float(form_data.sd),
+    )
+    rozklad_ = f"Prawdopodobienstwo ze {number} z parametrami {form_data} jest wiekszy od x to :"
     context_data = {
         "request": request,
         "finall_data": finall_data,

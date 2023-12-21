@@ -11,19 +11,17 @@ def prawdopodobienstwo_przedzialu(mean: float, sd: float, first: float, second: 
     return norm.cdf(second, loc=mean, scale=sd) - norm.cdf(first, loc=mean, scale=sd)
 
 
-def prawdopodobienstwo_ze_wieksze(number:float,mean:float,sd:float):
+def prawdopodobienstwo_ze_wieksze(number: float, mean: float, sd: float):
     probability = 1 - norm.cdf(number, loc=mean, scale=sd)
     return probability
 
-def kwantyl_standardowy(quantile:float):
+
+def kwantyl_standardowy(quantile: float):
     return norm.ppf(quantile)
 
-def kwantyl_rozkladu_normalnego():
-    mean = int(input("podaj srednia dla x: "))
-    sd = int(input("podaj odchylenie dla x: "))
-    probability = float(input("podaj prawdopodobienstwo: "))
-    quantile = norm.ppf(probability, loc=mean, scale=sd)
-    print(f"Kwantyl: {quantile}")
+
+def kwantyl_rozkladu_normalnego(mean: float, sd: float, probability: float):
+    return norm.ppf(probability, loc=mean, scale=sd)
 
 
 def uczciwy_rzut_kostka():

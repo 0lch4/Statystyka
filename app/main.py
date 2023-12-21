@@ -2,7 +2,14 @@ from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from app.models import (
+    RozkladNormalnyForm,
+    PrawdopodobienstwoPrzedzialu,
+    PrawdopodobienstwoZeWieksze,
+    KwantylRozkladuNormalnego,
+    KwantylStandardowy,
+    UczciwyRzutKostka
+)
 from typing import Any
 from app.calculator.calculator import (
     rozklad_normalny,
@@ -10,6 +17,7 @@ from app.calculator.calculator import (
     prawdopodobienstwo_ze_wieksze,
     kwantyl_standardowy,
     kwantyl_rozkladu_normalnego,
+    uczciwy_rzut_kostka
 )
 
 app = FastAPI()
@@ -17,35 +25,6 @@ app = FastAPI()
 templates = Jinja2Templates(directory="app/templatesx")
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
-
-class RozkladNormalnyForm(BaseModel):
-    wartosc: str
-    mean: str
-    sd: str
-
-
-class PrawdopodobienstwoPrzedzialu(BaseModel):
-    mean: str
-    sd: str
-    first: str
-    second: str
-
-
-class PrawdopodobienstwoZeWieksze(BaseModel):
-    number: str
-    mean: str
-    sd: str
-
-
-class KwantylStandardowy(BaseModel):
-    quantile: str
-
-
-class KwantylRozkladuNormalnego(BaseModel):
-    mean: str
-    sd: str
-    probability: str
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -66,6 +45,8 @@ async def submit_form(option: str = Form(...)) -> Any:
         return RedirectResponse("/kwantyl_standardowy", status_code=303)
     if option == "kwantyl_rozkladu_normalnego":
         return RedirectResponse("/kwantyl_rozkladu_normalnego", status_code=303)
+    if option == "uczciwy_rzut_kostka":
+        return RedirectResponse("/uczciwy_rzut_kostka", status_code=303)
     return None
 
 
@@ -185,6 +166,7 @@ async def kwantyl_rozkladu_normalnego_template(request: Request) -> Any:
     )
 
 
+
 @app.post("/kwantyl_rozkladu_normalnego", response_class=HTMLResponse)
 async def kwantyl_rozkladu_normalnego_form(
     request: Request,
@@ -207,6 +189,33 @@ async def kwantyl_rozkladu_normalnego_form(
     print("finall_data in rozklad_normalny_form:", finall_data)
     return templates.TemplateResponse("results.html", context_data)
 
+
+@app.get("/uczciwy_rzut_kostka", response_class=HTMLResponse)
+async def uczciwy_rzut_kostka_template(request: Request) -> Any:
+    return templates.TemplateResponse(
+        "uczciwy_rzut_kostka.html", {"request": request}
+    )
+
+
+@app.post("/uczciwy_rzut_kostka", response_class=HTMLResponse)
+async def uczciwy_rzut_kostka_form(
+    request: Request,
+    rng: str = Form(...),
+) -> Any:
+    form_data = UczciwyRzutKostka(rng=rng)
+    finall_data = uczciwy_rzut_kostka(
+        int(form_data.rng)
+    )
+    rozklad_ = (
+        f"Wynik dla uczciwych {rng} rzutów kostką to:"
+    )
+    context_data = {
+        "request": request,
+        "finall_data": finall_data,
+        "rozklad_": rozklad_,
+    }
+    print("finall_data in rozklad_normalny_form:", finall_data)
+    return templates.TemplateResponse("results.html", context_data)
 
 @app.get("/results", response_class=HTMLResponse)
 async def results(finall_data: dict[str, str], rozklad_: str) -> Any:

@@ -19,6 +19,7 @@ def test_dropdown(client: Any = client) -> None:
     assert "prawdopodobienstwo_ze_wieksze" in str(response.content)
     assert "kwantyl_standardowy" in str(response.content)
     assert "kwantyl_rozkladu_normalnego" in str(response.content)
+    assert "uczciwy_rzut_kostka" in str(response.content)
 
 
 ######################################################
@@ -53,6 +54,11 @@ def test_submit_kwantyl_rozkladu_normalnego(client: Any = client) -> None:
     assert response.status_code == 200
     assert RedirectResponse("/kwantyl_rozkladu_normalnego")
 
+def test_submit_kwantyl_uczciwy_rzut_kostka(client: Any = client) -> None:
+    response = client.post("/submit", data={"option": "uczciwy_rzut_kostka"})
+    assert response.status_code == 200
+    assert RedirectResponse("/uczciwy_rzut_kostka")
+
 
 ########################################################
 
@@ -79,6 +85,10 @@ def test_kwantyl_standardowy(client: Any = client) -> None:
 
 def test_kwantyl_rozkladu_normalnego(client: Any = client) -> None:
     response = client.get("/kwantyl_rozkladu_normalnego")
+    assert response.status_code == 200
+
+def test_uczciwy_rzut_kostka(client: Any = client) -> None:
+    response = client.get("/uczciwy_rzut_kostka")
     assert response.status_code == 200
 
 
@@ -127,4 +137,13 @@ def test_kwantyl_rozkladu_normalnego_form(client: Any = client) -> None:
     )
     assert response.status_code == 200
     assert "-0.05492220464457542" in str(response.content)
+    assert RedirectResponse("/results")
+
+def test_uczciwy_rzut_kostka_form(client: Any = client) -> None:
+    response = client.post(
+        "/uczciwy_rzut_kostka",
+        data={"rng":"100"},
+    )
+    assert response.status_code == 200
+    assert "reszka" in str(response.content)
     assert RedirectResponse("/results")

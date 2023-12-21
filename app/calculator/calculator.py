@@ -24,10 +24,8 @@ def kwantyl_rozkladu_normalnego(mean: float, sd: float, probability: float):
     return norm.ppf(probability, loc=mean, scale=sd)
 
 
-def uczciwy_rzut_kostka():
-    rng = int(input("Podaj ilość uczciwych rzutów które chcesz wykonać: "))
-    results_fair = np.random.choice(["orzeł", "reszka"], size=rng)
-    print(results_fair)
+def uczciwy_rzut_kostka(rng:int):
+    return np.random.choice(["orzeł", "reszka"], size=rng)
 
 
 def nieuczciwy_rzut_kostka():

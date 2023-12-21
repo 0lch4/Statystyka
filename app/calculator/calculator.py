@@ -25,19 +25,11 @@ def kwantyl_rozkladu_normalnego(mean: float, sd: float, probability: float):
 
 
 def uczciwy_rzut_kostka(rng:int):
-    return np.random.choice(["orzeł", "reszka"], size=rng)
+    return np.random.choice(["orzel", "reszka"], size=rng)
 
 
-def nieuczciwy_rzut_kostka():
-    rng = int(input("Podaj ilość uczciwych rzutów które chcesz wykonać: "))
-    ftrow1 = float(
-        input("Podaj prawdopodobienstwo dla orla (suma z reszka musi wynosic 1): ")
-    )
-    ftrow2 = float(
-        input("Podaj prawdopodobienstwo dla reszki (suma z orlem musi wynosic 1): ")
-    )
-    results = np.random.choice(["orzeł", "reszka"], size=rng, p=[ftrow1, ftrow2])
-    print(results)
+def nie_uczciwy_rzut_kostka(rng:int,fthrow1:float,fthrow2:float):
+    return np.random.choice(["orzel", "reszka"], size=rng, p=[fthrow1, fthrow2])
 
 
 def analiza_danych_z_rozkladu():

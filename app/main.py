@@ -8,7 +8,8 @@ from app.models import (
     PrawdopodobienstwoZeWieksze,
     KwantylRozkladuNormalnego,
     KwantylStandardowy,
-    UczciwyRzutKostka
+    UczciwyRzutKostka,
+    NieUczciwyRzutKostka
 )
 from typing import Any
 from app.calculator.calculator import (
@@ -17,7 +18,8 @@ from app.calculator.calculator import (
     prawdopodobienstwo_ze_wieksze,
     kwantyl_standardowy,
     kwantyl_rozkladu_normalnego,
-    uczciwy_rzut_kostka
+    uczciwy_rzut_kostka,
+    nie_uczciwy_rzut_kostka
 )
 
 app = FastAPI()
@@ -47,6 +49,8 @@ async def submit_form(option: str = Form(...)) -> Any:
         return RedirectResponse("/kwantyl_rozkladu_normalnego", status_code=303)
     if option == "uczciwy_rzut_kostka":
         return RedirectResponse("/uczciwy_rzut_kostka", status_code=303)
+    if option == "nie_uczciwy_rzut_kostka":
+        return RedirectResponse("/nie_uczciwy_rzut_kostka", status_code=303)
     return None
 
 
@@ -208,6 +212,34 @@ async def uczciwy_rzut_kostka_form(
     )
     rozklad_ = (
         f"Wynik dla uczciwych {rng} rzutów kostką to:"
+    )
+    context_data = {
+        "request": request,
+        "finall_data": finall_data,
+        "rozklad_": rozklad_,
+    }
+    print("finall_data in rozklad_normalny_form:", finall_data)
+    return templates.TemplateResponse("results.html", context_data)
+
+@app.get("/nie_uczciwy_rzut_kostka", response_class=HTMLResponse)
+async def nie_uczciwy_rzut_kostka_template(request: Request) -> Any:
+    return templates.TemplateResponse(
+        "nie_uczciwy_rzut_kostka.html", {"request": request}
+    )
+
+@app.post("/nie_uczciwy_rzut_kostka", response_class=HTMLResponse)
+async def nie_uczciwy_rzut_kostka_form(
+    request: Request,
+    rng: str = Form(...),
+    fthrow1: str =  Form(...),
+    fthrow2: str =  Form(...)
+) -> Any:
+    form_data = NieUczciwyRzutKostka(rng=rng,fthrow1=fthrow1,fthrow2=fthrow2)
+    finall_data = nie_uczciwy_rzut_kostka(
+        int(form_data.rng),float(form_data.fthrow1),float(form_data.fthrow2)
+    )
+    rozklad_ = (
+        f"Wynik dla nie uczciwych {rng} rzutów kostką to:"
     )
     context_data = {
         "request": request,

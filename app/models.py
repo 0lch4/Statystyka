@@ -31,3 +31,8 @@ class KwantylRozkladuNormalnego(BaseModel):
 
 class UczciwyRzutKostka(BaseModel):
     rng: str
+
+class NieUczciwyRzutKostka(BaseModel):
+    rng:str
+    fthrow1:str
+    fthrow2:str

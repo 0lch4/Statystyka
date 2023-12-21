@@ -20,6 +20,7 @@ def test_dropdown(client: Any = client) -> None:
     assert "kwantyl_standardowy" in str(response.content)
     assert "kwantyl_rozkladu_normalnego" in str(response.content)
     assert "uczciwy_rzut_kostka" in str(response.content)
+    assert "nie_uczciwy_rzut_kostka" in str(response.content)
 
 
 ######################################################
@@ -59,6 +60,11 @@ def test_submit_kwantyl_uczciwy_rzut_kostka(client: Any = client) -> None:
     assert response.status_code == 200
     assert RedirectResponse("/uczciwy_rzut_kostka")
 
+def test_submit_kwantyl_nie_uczciwy_rzut_kostka(client: Any = client) -> None:
+    response = client.post("/submit", data={"option": "nie_uczciwy_rzut_kostka"})
+    assert response.status_code == 200
+    assert RedirectResponse("/nie_uczciwy_rzut_kostka")
+
 
 ########################################################
 
@@ -89,6 +95,10 @@ def test_kwantyl_rozkladu_normalnego(client: Any = client) -> None:
 
 def test_uczciwy_rzut_kostka(client: Any = client) -> None:
     response = client.get("/uczciwy_rzut_kostka")
+    assert response.status_code == 200
+
+def test_nie_uczciwy_rzut_kostka(client: Any = client) -> None:
+    response = client.get("/nie_uczciwy_rzut_kostka")
     assert response.status_code == 200
 
 
@@ -145,5 +155,26 @@ def test_uczciwy_rzut_kostka_form(client: Any = client) -> None:
         data={"rng":"100"},
     )
     assert response.status_code == 200
+    assert "orzel" or "reszka" in str(response.content)
+    assert RedirectResponse("/results")
+
+def test_nie_uczciwy_rzut_kostka_form_reszka(client: Any = client) -> None:
+    response = client.post(
+        "/nie_uczciwy_rzut_kostka",
+        data={"rng":"100","fthrow1":"0","fthrow2":"1"},
+    )
+    assert response.status_code == 200
     assert "reszka" in str(response.content)
+    assert "orzel" not in str(response.content)
+    assert RedirectResponse("/results")
+
+
+def test_nie_uczciwy_rzut_kostka_form_orzel(client: Any = client) -> None:
+    response = client.post(
+        "/nie_uczciwy_rzut_kostka",
+        data={"rng":"100","fthrow1":"1","fthrow2":"0"},
+    )
+    assert response.status_code == 200
+    assert "orzel" in str(response.content)
+    assert "reszka" not in str(response.content)
     assert RedirectResponse("/results")

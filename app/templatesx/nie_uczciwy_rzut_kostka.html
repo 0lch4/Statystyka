@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uczciwy rzut kostka</title>
+</head>
+<body>
+    <form id='nie_uczciwy_rzut_kostka_form' action="/nie_uczciwy_rzut_kostka" method="post">
+        <label for="rng">Podaj ile razy chcesz rzucic kostka:</label>
+        <input type="text" id="rng" name="rng"><br>
+        <label for="rng">Uwaga! suma prawdopodobienstw dla orla i reszki musi wynosic 1:</label><br>
+        <label for="fthrow1">Podaj prawdopodobienstwo dla orla:</label>
+        <input type="text" id="fthrow1" name="fthrow1"><br>
+        <label for="fthrow2">Podaj prawdopodobienstwo dla reszki:</label>
+        <input type="text" id="fthrow2" name="fthrow2"><br>
+        
+        <input type="submit" value="Wyślij">
+    </form>    
+</body>
+</html>

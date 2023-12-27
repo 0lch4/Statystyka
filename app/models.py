@@ -1,38 +1,46 @@
 from pydantic import BaseModel
 
 
-class RozkladNormalnyForm(BaseModel):
-    wartosc: str
-    mean: str
-    sd: str
+class RozkladNormalny(BaseModel):
+    wartosc: float
+    mean: float
+    sd: float
 
 
 class PrawdopodobienstwoPrzedzialu(BaseModel):
-    mean: str
-    sd: str
-    first: str
-    second: str
+    mean: float
+    sd: float
+    first: float
+    second: float
 
 
 class PrawdopodobienstwoZeWieksze(BaseModel):
-    number: str
-    mean: str
-    sd: str
+    number: float
+    mean: float
+    sd: float
 
 
 class KwantylStandardowy(BaseModel):
-    quantile: str
+    quantile: float
 
 
 class KwantylRozkladuNormalnego(BaseModel):
-    mean: str
-    sd: str
-    probability: str
+    mean: float
+    sd: float
+    probability: float
+
 
 class UczciwyRzutKostka(BaseModel):
-    rng: str
+    rng: int
+
 
 class NieUczciwyRzutKostka(BaseModel):
-    rng:str
-    fthrow1:str
-    fthrow2:str
+    rng: int
+    fthrow1: float
+    fthrow2: float
+
+
+class AnalizaDanychZRozkladu(BaseModel):
+    lenn: float
+    mean: float
+    sd: float

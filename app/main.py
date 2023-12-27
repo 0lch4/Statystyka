@@ -3,13 +3,14 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from app.models import (
-    RozkladNormalnyForm,
+    RozkladNormalny,
     PrawdopodobienstwoPrzedzialu,
     PrawdopodobienstwoZeWieksze,
     KwantylRozkladuNormalnego,
     KwantylStandardowy,
     UczciwyRzutKostka,
-    NieUczciwyRzutKostka
+    NieUczciwyRzutKostka,
+    AnalizaDanychZRozkladu,
 )
 from typing import Any
 from app.calculator.calculator import (
@@ -19,7 +20,8 @@ from app.calculator.calculator import (
     kwantyl_standardowy,
     kwantyl_rozkladu_normalnego,
     uczciwy_rzut_kostka,
-    nie_uczciwy_rzut_kostka
+    nie_uczciwy_rzut_kostka,
+    analiza_danych_z_rozkladu as analiza_rozkladu,
 )
 
 app = FastAPI()
@@ -51,6 +53,8 @@ async def submit_form(option: str = Form(...)) -> Any:
         return RedirectResponse("/uczciwy_rzut_kostka", status_code=303)
     if option == "nie_uczciwy_rzut_kostka":
         return RedirectResponse("/nie_uczciwy_rzut_kostka", status_code=303)
+    if option == "analiza_rozkladu":
+        return RedirectResponse("/analiza_rozkladu", status_code=303)
     return None
 
 
@@ -66,7 +70,7 @@ async def rozklad_normalny_form(
     mean: str = Form(...),
     sd: str = Form(...),
 ) -> Any:
-    form_data = RozkladNormalnyForm(wartosc=wartosc, mean=mean, sd=sd)
+    form_data = RozkladNormalny(wartosc=wartosc, mean=mean, sd=sd)
     finall_data = rozklad_normalny(
         float(form_data.wartosc), float(form_data.mean), float(form_data.sd)
     )
@@ -76,7 +80,6 @@ async def rozklad_normalny_form(
         "finall_data": finall_data,
         "rozklad_": rozklad_,
     }
-    print("finall_data in rozklad_normalny_form:", finall_data)
     return templates.TemplateResponse("results.html", context_data)
 
 
@@ -110,7 +113,6 @@ async def prawdopodobienstwo_przedzialu_form(
         "finall_data": finall_data,
         "rozklad_": rozklad_,
     }
-    print("finall_data in rozklad_normalny_form:", finall_data)
     return templates.TemplateResponse("results.html", context_data)
 
 
@@ -134,13 +136,13 @@ async def prawdopodobienstwo_ze_wieksze_form(
         float(form_data.mean),
         float(form_data.sd),
     )
-    rozklad_ = f"Prawdopodobienstwo ze {number} z parametrami {form_data} jest wiekszy od x to :"
+    rozklad_ = f"""Prawdopodobienstwo ze {number} z parametrami
+    {form_data} jest wiekszy od x to :"""
     context_data = {
         "request": request,
         "finall_data": finall_data,
         "rozklad_": rozklad_,
     }
-    print("finall_data in rozklad_normalny_form:", finall_data)
     return templates.TemplateResponse("results.html", context_data)
 
 
@@ -159,7 +161,6 @@ async def kwantyl_standardowy_form(request: Request, quantile: str = Form(...)) 
         "finall_data": finall_data,
         "rozklad_": rozklad_,
     }
-    print("finall_data in rozklad_normalny_form:", finall_data)
     return templates.TemplateResponse("results.html", context_data)
 
 
@@ -168,7 +169,6 @@ async def kwantyl_rozkladu_normalnego_template(request: Request) -> Any:
     return templates.TemplateResponse(
         "kwantyl_rozkladu_normalnego.html", {"request": request}
     )
-
 
 
 @app.post("/kwantyl_rozkladu_normalnego", response_class=HTMLResponse)
@@ -190,15 +190,12 @@ async def kwantyl_rozkladu_normalnego_form(
         "finall_data": finall_data,
         "rozklad_": rozklad_,
     }
-    print("finall_data in rozklad_normalny_form:", finall_data)
     return templates.TemplateResponse("results.html", context_data)
 
 
 @app.get("/uczciwy_rzut_kostka", response_class=HTMLResponse)
 async def uczciwy_rzut_kostka_template(request: Request) -> Any:
-    return templates.TemplateResponse(
-        "uczciwy_rzut_kostka.html", {"request": request}
-    )
+    return templates.TemplateResponse("uczciwy_rzut_kostka.html", {"request": request})
 
 
 @app.post("/uczciwy_rzut_kostka", response_class=HTMLResponse)
@@ -207,19 +204,15 @@ async def uczciwy_rzut_kostka_form(
     rng: str = Form(...),
 ) -> Any:
     form_data = UczciwyRzutKostka(rng=rng)
-    finall_data = uczciwy_rzut_kostka(
-        int(form_data.rng)
-    )
-    rozklad_ = (
-        f"Wynik dla uczciwych {rng} rzutów kostką to:"
-    )
+    finall_data = uczciwy_rzut_kostka(int(form_data.rng))
+    rozklad_ = f"Wynik dla uczciwych {rng} rzutów kostką to:"
     context_data = {
         "request": request,
         "finall_data": finall_data,
         "rozklad_": rozklad_,
     }
-    print("finall_data in rozklad_normalny_form:", finall_data)
     return templates.TemplateResponse("results.html", context_data)
+
 
 @app.get("/nie_uczciwy_rzut_kostka", response_class=HTMLResponse)
 async def nie_uczciwy_rzut_kostka_template(request: Request) -> Any:
@@ -227,27 +220,48 @@ async def nie_uczciwy_rzut_kostka_template(request: Request) -> Any:
         "nie_uczciwy_rzut_kostka.html", {"request": request}
     )
 
+
 @app.post("/nie_uczciwy_rzut_kostka", response_class=HTMLResponse)
 async def nie_uczciwy_rzut_kostka_form(
     request: Request,
     rng: str = Form(...),
-    fthrow1: str =  Form(...),
-    fthrow2: str =  Form(...)
+    fthrow1: str = Form(...),
+    fthrow2: str = Form(...),
 ) -> Any:
-    form_data = NieUczciwyRzutKostka(rng=rng,fthrow1=fthrow1,fthrow2=fthrow2)
+    form_data = NieUczciwyRzutKostka(rng=rng, fthrow1=fthrow1, fthrow2=fthrow2)
     finall_data = nie_uczciwy_rzut_kostka(
-        int(form_data.rng),float(form_data.fthrow1),float(form_data.fthrow2)
+        int(form_data.rng), float(form_data.fthrow1), float(form_data.fthrow2)
     )
-    rozklad_ = (
-        f"Wynik dla nie uczciwych {rng} rzutów kostką to:"
-    )
+    rozklad_ = f"Wynik dla nie uczciwych {rng} rzutów kostką to:"
     context_data = {
         "request": request,
         "finall_data": finall_data,
         "rozklad_": rozklad_,
     }
-    print("finall_data in rozklad_normalny_form:", finall_data)
     return templates.TemplateResponse("results.html", context_data)
+
+
+@app.get("/analiza_rozkladu", response_class=HTMLResponse)
+async def analiza_rozkladu_template(request: Request) -> Any:
+    return templates.TemplateResponse("analiza_rozkladu.html", {"request": request})
+
+
+@app.post("/analiza_rozkladu", response_class=HTMLResponse)
+async def analiza_rozkladu_form(
+    request: Request, lenn: str = Form(...), mean: str = Form(...), sd: str = Form(...)
+) -> Any:
+    form_data = AnalizaDanychZRozkladu(lenn=lenn, mean=mean, sd=sd)
+    finall_data = analiza_rozkladu(
+        int(form_data.lenn), float(form_data.mean), float(form_data.sd)
+    )
+    rozklad_ = "Wynik dla tego zestawu to:"
+    context_data = {
+        "request": request,
+        "finall_data": finall_data,
+        "rozklad_": rozklad_,
+    }
+    return templates.TemplateResponse("results.html", context_data)
+
 
 @app.get("/results", response_class=HTMLResponse)
 async def results(finall_data: dict[str, str], rozklad_: str) -> Any:
